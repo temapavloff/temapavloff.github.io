@@ -55,11 +55,11 @@ html, body {
 
 .index__subtitle {
     margin: 0;
-    font-size: 40px;
+    font-size: 60px;
     color: #000;
     line-height: 0.8;
     position: relative;
-    top: 2px;
+    top: 4px;
 }
 
 .index__header.-with-cover > .index__title {
@@ -156,9 +156,17 @@ html, body {
 }
 
 .post__main > * {
+    margin: 20px 0;
     max-width: 800px;
     box-sizing: border-box;
 }
+
+.post__main > h1 { font-size: 40px; }
+.post__main > h2 { font-size: 36px; }
+.post__main > h3 { font-size: 28px; }
+.post__main > h4 { font-size: 20px; }
+.post__main > h5 { font-size: 20px; }
+.post__main > h6 { font-size: 20px; }
 
 .post__main > h1,
 .post__main > h2,
@@ -166,7 +174,7 @@ html, body {
 .post__main > h4,
 .post__main > h5,
 .post__main > h6 {
-    margin: 2em 0 1em 0;
+    margin: 40px 0 20px 0;
 }
 
 .post__main > p {
@@ -179,4 +187,8 @@ html, body {
 
 .post__main > p.wide {
     max-width: 100%;
+}
+
+.post__comments {
+    padding: 0 80px 40px 80px;
 }
