@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+	<meta charset="utf-8"> 
+	<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=cyrillic" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles.css">
+	<head>
+		
+<title>Строгий JS</title>
+<meta name="og:title" content="Строгий JS">
+
+<meta name="og:description" content="Добавим Джаваскрипту предсказуемости">
+
+
+	</head>
+	<body>
+		
+
+<header class="index__header">
+    <div class="index__title">
+        <a href="/" class="index__titleLink">Тёмин<br>бложег</a>
+    </div>
+    <h1 class="index__subtitle">Строгий JS</h1>
+</header>
+
+<main class="post__main">
+    <blockquote>
+<p>Код приведенный ниже &ndash; это скорее проверка концепции, чем руководство к действию. Используем в проде на свой страх и риск!</p>
+</blockquote>
+
+<p>Если вас, как и меня задолбало автоприведение типов и возможность писать в несуществующие поля объектов в JS, то вот небольшое решение:</p>
+
+<p><em>(Если вы уже используете TypeScript или Facebook Flow, то заметка не для вас)</em></p>
+
+<pre><code class="language-JavaScript">export default class CommonObject {
+  static instantiate(constr, ...args) {
+    return Object.seal(new constr(...args));
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'CommonObject';
+  }
+
+  [Symbol.toPrimitive](hint) {
+    throw new TypeError(`
+      this[Symbol.toStringTag]} cannot be converted to 
+      ${hint === 'default' ? 'primitive value' : hint}
+    `);
+  }
+}
+</code></pre>
+
+<p>Все свои кастомные объекты наследуем от <code>CommonObject</code>:</p>
+
+<pre><code class="language-JavaScript">class Person extends CommonObject {
+  constructor(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+}
+</code></pre>
+
+<p>Экземпляры объектов придётся создавать так, шоподелать:
+<code>const vasya = CommonObject.instantiate(Person, 'Вася', 'Пупкин')</code>
+Попытка записи в несуществующее поле такого объекта будет в <code>strict mode</code> будет ронять программу, в обычно режиме просто игнорироваться.
+Более подробно про <a href="http://www.2ality.com/2013/06/freezing-instances.html">заморозку объектов</a> при инстанцировании у Акселя.</p>
+
+<p>Специальный метод <code>[Symbol.toPrimitive]()</code> позволяет переопределить поведение объекта при автоматическом приведении типов. Мы тут кидаем исключение. Теперь выражения типа <code>2 + vasya</code> или <code>vasya + ' some string'</code> кидают исключение. Никаких больше непонятных NaN`ов.
+Более подробно про <a href="https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive">Symbol.toPrimitive</a>.</p>
+
+<p>Ну и как бонус, благодаря геттеру <code>[Symbol.toStringTag]()</code>, выражение <code>vasya.toSting()</code> возвращает <code>[object CommonObject]</code>, а не <code>[object Object]</code>.
+Более подробно про <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toStringTag">Symbol.toStringTag</a>.</p>
+
+</main>
+<aside class="post__meta">
+    Теги: 
+    <ul class="post__tags">
+        
+        <li class="post__tagsItem">
+            <a class="post__tagsLink" href="/tags/programmirovanie">программирование</a>
+        </li>
+        
+        <li class="post__tagsItem">
+            <a class="post__tagsLink" href="/tags/javascript">javascript</a>
+        </li>
+        
+        <li class="post__tagsItem">
+            <a class="post__tagsLink" href="/tags/lajfhaki-podehali">лайфхаки подъехали</a>
+        </li>
+        
+    </ul>
+</aside>
+<aside class="post__comments" id="remark42"></aside>
+<script>
+    if (window.location.host === 'temapavloff.me') {
+        var remark_config = {
+            site_id: 'temapavloff.me',
+            url: '\/2018\/09\/02\/strict-js',
+            max_shown_comments: 10, 
+        };
+    
+        (function() {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://temapavloff.webtm.ru/web/embed.js';
+            (d.head || d.body).appendChild(s);
+        })();
+    }
+</script>
+<script src="/assets/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<link rel="stylesheet" href="/assets/mono-blue.css">
+
+	</body>
+</html>

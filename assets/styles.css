@@ -193,3 +193,19 @@ html, body {
     padding: 0 80px 40px 80px;
     max-width: 800px;
 }
+
+.post__main a {
+    color: #42aaff;
+    text-decoration: none;
+    transition: color 150ms ease-in-out;
+}
+
+.post__main a:hover {
+    color: #ff4f00;
+}
+
+.post__main > p > code {
+    background: #eaeef3;
+    padding: 0 2px;
+    border-radius: 4px;
+}
