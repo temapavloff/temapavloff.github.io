@@ -182,11 +182,14 @@ html, body {
 }
 
 .post__main > p > img {
-    max-width: 100%;
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: filter 50ms ease-in-out;    
 }
 
 .post__main > p.wide {
-    max-width: 100%;
+    max-width: 1200px;
 }
 
 .post__comments {
@@ -208,4 +211,8 @@ html, body {
     background: #eaeef3;
     padding: 0 2px;
     border-radius: 4px;
+}
+
+img.blur {
+    filter: blur(10px);
 }
