@@ -12,3 +12,14 @@ const loadImg = img => {
 for (const i of imgsToLoad) {
     loadImg(i)
 }
+
+const cover = document.querySelector('.js-cover');
+
+if (cover) {
+    const loader = new Image();
+    loader.onload = () => {
+        cover.classList.remove('blur');
+        cover.style.backgroundImage = `url(${loader.src})`;
+    };
+    loader.src = cover.dataset.cover;
+}

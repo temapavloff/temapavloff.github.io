@@ -17,6 +17,17 @@ html, body {
     flex-direction: column;
 }
 
+.index__headerCover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+    background-position: center;
+    background-size: cover;
+}
+
 .index__headerOverlay {
     position: absolute;
     top: 0;
@@ -213,6 +224,6 @@ html, body {
     border-radius: 4px;
 }
 
-img.blur {
+.blur {
     filter: blur(10px);
 }
