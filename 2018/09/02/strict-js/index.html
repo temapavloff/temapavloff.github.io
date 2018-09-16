@@ -8,7 +8,7 @@
 <title>Строгий JS</title>
 <meta name="og:title" content="Строгий JS">
 
-<meta name="og:description" content="Добавим Джаваскрипту предсказуемости">
+<meta name="og:description" content="Фантазии на тему слабой типизации в Джаваскрипте">
 
 
 	</head>
@@ -23,15 +23,172 @@
 </header>
 
 <main class="post__main">
-    <blockquote>
-<p>Код приведенный ниже &ndash; это скорее проверка концепции, чем руководство к действию. Используем в проде на свой страх и риск!</p>
+    <p>Джаваскрипт &mdash; язык со слабой динамической типизацией. На мой взгляд &mdash; это худшее сочетание. Статическая типизация спасёт от нечаянной передачи в функцию того, что туда передавать не надо. Сильная защитит от ошибок нечаянного приведения типов. Нет нужды писать целый класс тестов &mdash; эти проверки сделает компилятор при сборке программы, или даже IDE в процессе написания кода. Но у Джаваскрипта нет ни того, ни другого.</p>
+
+<p>Умные ребята придумали специальные выручалочки. Майкрософт разработали TypeScript &mdash; целый новый статически типизированный язык программирования, который компилируется в JS. А в Фейсбуке придумали Flow &mdash; надстройку над Джаваскрпитом, которая добавляет аннотации типов данных.</p>
+
+<p>TypeScript и Flow хороши, но требуют специальных систем сборки и защищают от ошибок только на этапе компиляции. Тем не менее добавить предсказуемости в программу на JS можно встроенными средствами языка.</p>
+
+<h4>Дисклеймер</h4>
+
+<blockquote>
+<p>Я всё же рекомендую пользоваться решениями от Майкрософта или Фейсбука. То, что я покажу дальше, требует поддержки стандарта ES6 и работает только в современных браузерах, да и покрывает лишь небольшую часть случаев. В общем, это скорее проверка концепции, а не решение для продакшена.</p>
 </blockquote>
 
-<p>Если вас, как и меня задолбало автоприведение типов и возможность писать в несуществующие поля объектов в JS, то вот небольшое решение:</p>
+<p>Для начала поговорим о некоторых нововведениях Джаваскрипта.</p>
 
-<p><em>(Если вы уже используете TypeScript или Facebook Flow, то заметка не для вас)</em></p>
+<h2>Замороженные и запечатанные объекты</h2>
 
-<pre><code class="language-JavaScript">export default class CommonObject {
+<p>По умолчанию вы можете добавлять или изменять любые поля любых объектов. На самом деле, <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty">это не совсем так</a>, но для простоты мы это опустим. Чтобы изменить умолчательное поведение, воспользуемся двумя интересными методами глобального объекта <code>Object</code> (это тавтология? :-): <code>Object.freeze</code> и <code>Object.seal</code>.</p>
+
+<p>Что они делают? <code>Object.freeze</code> запрещает любые изменения свойств переданного объекта:</p>
+
+<pre><code class="language-JavaScript">const obj = {name: 'Vasya', age: 28};
+const frozen = Object.freeze(obj);
+frozen.age = 33; // TypeError
+frozen.lastName = 'Pupkin'; // TypeError
+</code></pre>
+
+<p>Как мы видим, попытка изменения существующего или добавление нового свойства вызывает ошибку <code>TypeError</code>. Неплохо, но для нас это перебор. Лучше воспользуемся методом <code>Object.seal</code>, он похож на предыдущий, но не запрещает менять существующие свойства:</p>
+
+<pre><code class="language-JavaScript">const obj = {name: 'Vasya', age: 28};
+const frozen = Object.freeze(obj);
+frozen.age = 33; // OK!
+frozen.lastName = 'Pupkin'; // TypeError
+</code></pre>
+
+<p>С этими знаниями можно описать класс с защитой от добавления левых свойств:</p>
+
+<pre><code class="language-JavaScript">class Person {
+  constructor(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    Object.seal(this);
+  }
+}
+</code></pre>
+
+<p>Надо учитывать один момент &mdash; по стандарту родительский конструктор можно вызвать только в самом верху дочернего, а такой код вызовет ошибку</p>
+
+<pre><code class="language-JavaScript">class BaseObject {
+  constructor() {
+    Object.seal(this)
+  }
+}
+
+class Person extends BaseObject {
+  constructor(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    super(); // Так сделать не получится :-(
+  }
+}
+</code></pre>
+
+<p>Из-за этой особенности вызов <code>Object.seal</code> придётся дублировать в каждом классе, ну или пользоваться каким-нибудь фабричным методом:</p>
+
+<pre><code class="language-JavaScript">function instanciate(constr, ...args) {
+  return Object.seal(new constr(...args));
+}
+</code></pre>
+
+<p>Более подробно про <a href="http://www.2ality.com/2013/06/freezing-instances.html">заморозку объектов</a> при инстанцировании у Акселя.</p>
+
+<h2>Понятные названия типов</h2>
+
+<p>У всех объектов в Джаваскритпе есть метод <code>toString</code>, возвращающий их строковое представление. В ваших собственных классах его можно переопределить:</p>
+
+<pre><code class="language-JavaScript">class Person {
+  constructor(firstName, lastName) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+  }
+
+  toString() {
+    return this.firstName + ' ' + this.lastName;
+  }
+}
+
+const obj = new Prson('Vasya', 'Pupkin');
+console.log(obj.toString());
+</code></pre>
+
+<p>Один из типичных способов использования этого метода &mdash; определение типа объекта:</p>
+
+<pre><code class="language-JavaScript">const arr = [1, 2, 3];
+console.log(Object.prototype.toString.call(arr)) // [object Array]
+</code></pre>
+
+<p>Но что будет, если мы провернем то же самое для нашего класса <code>Person</code>?</p>
+
+<pre><code class="language-JavaScript">const obj = new Person('Vasya', 'Pupkin');
+console.log(Object.prototype.toString.call(obj)); // [object Object]
+</code></pre>
+
+<p>Так происходит потому что мы подменяем вызов собственного метода на вызов метода прототипа <code>Object</code>, а он устроен немного иначе. В общем случае его можно было бы описать так:</p>
+
+<pre><code class="language-JavaScript">Object.prototype.toString = function () {
+  return '[object ' + this[Symbol.toStringTag] + ']';
+}
+</code></pre>
+
+<p>Внутри себя этот метод использует специальное свойство <code>[Symbol.toStringTag]</code> &mdash; так называемый широко известный (well-known) символ. Подробнее про них можно прочитать <a href="https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Symbol#%D0%98%D0%B7%D0%B2%D0%B5%D1%81%D1%82%D0%BD%D1%8B%D0%B5_%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D1%8B">здесь</a>. Строковый тег можно определить свой:</p>
+
+<pre><code class="language-JavaScript">class Person {
+// ...
+
+  get [Symbol.toStringTag]() {
+    return 'Person';
+  }
+}
+
+const obj = new Prson('Vasya', 'Pupkin');
+console.log(Object.prototype.toString.call(obj)); // [object Person]
+</code></pre>
+
+<p>Теперь всегда можно понять, с каким объектом мы имеем дело.</p>
+
+<h2>Приведение к примитивному типу</h2>
+
+<p>Автоматическое приведение типов в Джаваскрипте работает в выражениях, например математических:</p>
+
+<pre><code class="language-JavaScript">console.log(2 + '2') // 22
+console.log(2 - '2') // 0
+console.log(2 * '2') // 4
+</code></pre>
+
+<p>Эффект приведения зависит от типов операндов и выбранного действия. Любая операция в JS что-нибудь да вернёт. Такой подход избавляет от ошибок в рантайме, но приводит к неожиданным последствиям: результатом сложения может оказаться строка или вообще какой-нибудь <code>not-a-number</code>.</p>
+
+<p>Добавим контроля с помощью широко известного символа <code>Symbol.toPrimitive</code>:</p>
+
+<pre><code class="language-Javascript">class Person {
+// ...
+
+  get [Symbol.toStringTag]() {
+    return 'CommonObject';
+  }
+
+  [Symbol.toPrimitive](hint) {
+    const type = Object.prototype.toString.call(this);
+    throw new TypeError(`${type} cannot be converted to
+    ${hint === 'default' ? 'primitive value' : hint}`);
+  }
+}
+
+const obj = new Person('Vasya', 'Pupkin')
+
+obj + 2 // TypeError
+</code></pre>
+
+<p>Этот метод будет автоматически вызван движком при выполнении приведения типов. Он принимает параметр <code>hint</code> &mdash; желаемый тип, но мы всегда кидаем исключение. Если уж так хочется конвертировать человека в строку или число, всегда можно вызвать соответствующий метод явным образом!</p>
+
+<p>Подробнее про <code>Symbol.toPrimitive</code> можно узнать <a href="https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive">здесь</a>.</p>
+
+<h2>Итог</h2>
+
+<p>Вот что мы получили в конце:</p>
+
+<pre><code class="language-JavaScript">class CommonObject {
   static instantiate(constr, ...args) {
     return Object.seal(new constr(...args));
   }
@@ -41,34 +198,33 @@
   }
 
   [Symbol.toPrimitive](hint) {
-    throw new TypeError(`
-      this[Symbol.toStringTag]} cannot be converted to 
-      ${hint === 'default' ? 'primitive value' : hint}
-    `);
+    const type = Object.prototype.toString.call(this);
+    throw new TypeError(`${type} cannot be converted to
+    ${hint === 'default' ? 'primitive value' : hint}`);
   }
 }
-</code></pre>
 
-<p>Все свои кастомные объекты наследуем от <code>CommonObject</code>:</p>
-
-<pre><code class="language-JavaScript">class Person extends CommonObject {
+class Person extends CommonObject {
   constructor(firstName, lastName) {
     this.firstName = firstName;
     this.lastName = lastName;
   }
+
+  toString() {
+    return this.firstName + ' ' + this.lastName;
+  }
 }
+
+// Создаем новые экземпляры так ¯\_(ツ)_/¯:
+const obj = CommonObject.instantiate(Person, 'Vasya', 'Pupkin');
+obj.firstName = 'Petya'; // OK!
+obj.age = 33; // TypeError
+obj + 2; // TypeError
+'hello ' + obj; // TypeError
+'hello ' + obj.toString() // hello Petya Pupkin
 </code></pre>
 
-<p>Экземпляры объектов придётся создавать так, шоподелать:
-<code>const vasya = CommonObject.instantiate(Person, 'Вася', 'Пупкин')</code>
-Попытка записи в несуществующее поле такого объекта будет в <code>strict mode</code> будет ронять программу, в обычно режиме просто игнорироваться.
-Более подробно про <a href="http://www.2ality.com/2013/06/freezing-instances.html">заморозку объектов</a> при инстанцировании у Акселя.</p>
-
-<p>Специальный метод <code>[Symbol.toPrimitive]()</code> позволяет переопределить поведение объекта при автоматическом приведении типов. Мы тут кидаем исключение. Теперь выражения типа <code>2 + vasya</code> или <code>vasya + ' some string'</code> кидают исключение. Никаких больше непонятных NaN`ов.
-Более подробно про <a href="https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toPrimitive">Symbol.toPrimitive</a>.</p>
-
-<p>Ну и как бонус, благодаря геттеру <code>[Symbol.toStringTag]()</code>, выражение <code>vasya.toSting()</code> возвращает <code>[object CommonObject]</code>, а не <code>[object Object]</code>.
-Более подробно про <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/toStringTag">Symbol.toStringTag</a>.</p>
+<p>Вот таким нехитрым способом можно упорядочить хаос чересчур динамического языка.</p>
 
 </main>
 <aside class="post__meta">
