@@ -6,12 +6,20 @@
     	<description>Безсвязные записки о вот этом вот всём</description>
 		<language>ru-RU</language>
 		
-    	<pubDate>Sun, 02 Sep 2018 23:00:00 +0000</pubDate>
-    	<lastBuildDate>Sun, 02 Sep 2018 23:00:00 +0000</lastBuildDate>
+    	<pubDate>Sun, 16 Sep 2018 21:00:00 +0000</pubDate>
+    	<lastBuildDate>Sun, 16 Sep 2018 21:00:00 +0000</lastBuildDate>
     	<docs>http://blogs.law.harvard.edu/tech/rss</docs>
     	<generator>GoBlogging</generator>
     	<managingEditor>pavl0ff@ya.ru (Артем Павлов)</managingEditor>
     	<webMaster>pavl0ff@ya.ru (Артем Павлов)</webMaster>
+		
+		<item>
+			<title>Невезуха</title>
+			<link>https://temapavloff.me/2018/09/16/bad-luck</link>
+			<description>Иногда череда неудач может закончиться даже забавно</description>
+			<pubDate>Sun, 16 Sep 2018 21:00:00 +0000</pubDate>
+      		<guid>https://temapavloff.me/2018/09/16/bad-luck</guid>
+		</item>
 		
 		<item>
 			<title>Строгий JS</title>
