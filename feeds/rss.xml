@@ -1,23 +1,24 @@
 <?xml version="1.0"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
+		<atom:link href="https://temapavloff.me/feeds/rss.xml" rel="self" type="application/rss+xml" />
     	<title>Тёмин Бложег</title>
     	<link>https://temapavloff.me</link>
     	<description>Безсвязные записки о вот этом вот всём</description>
 		<language>ru-RU</language>
 		
-    	<pubDate>Sunday, 02 Sep 2018 23:00:00 UTC</pubDate>
-    	<lastBuildDate>Sunday, 02 Sep 2018 23:00:00 UTC</lastBuildDate>
+    	<pubDate>02 Sep 18 23:00 UTC</pubDate>
+    	<lastBuildDate>02 Sep 18 23:00 UTC</lastBuildDate>
     	<docs>http://blogs.law.harvard.edu/tech/rss</docs>
     	<generator>GoBlogging</generator>
-    	<managingEditor>pavl0ff@ya.ru</managingEditor>
-    	<webMaster>pavl0ff@ya.ru</webMaster>
+    	<managingEditor>pavl0ff@ya.ru Артем Павлов</managingEditor>
+    	<webMaster>pavl0ff@ya.ru Артем Павлов</webMaster>
 		
 		<item>
 			<title>Строгий JS</title>
 			<link>https://temapavloff.me/2018/09/02/strict-js</link>
 			<description>Фантазии на тему слабой типизации в Джаваскрипте</description>
-			<pubDate>Sunday, 02 Sep 2018 23:00:00 UTC</pubDate>
+			<pubDate>02 Sep 18 23:00 UTC</pubDate>
       		<guid>https://temapavloff.me/2018/09/02/strict-js</guid>
 		</item>
 		
